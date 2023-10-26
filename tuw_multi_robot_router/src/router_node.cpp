@@ -30,6 +30,7 @@
 #include <tuw_global_router/router_node.h>
 #include <tuw_global_router/srr_utils.h>
 #include <tuw_multi_robot_msgs/Route.h>
+#include <tuw_multi_robot_msgs/RouteTable.h>
 #include <chrono>
 #include <boost/functional/hash.hpp>
 #include <boost/regex.hpp>
@@ -92,6 +93,7 @@ Router_Node::Router_Node ( ros::NodeHandle &_n ) : Router(),
 
     //static publishers
     pubPlannerStatus_ = n_.advertise<tuw_multi_robot_msgs::RouterStatus> ( "planner_status", 1 );
+    pubRoutingTable_ = n_.advertise<tuw_multi_robot_msgs::RouteTable> ("/robot_route_table", 1);
 
     //dynamic reconfigure
     call_type = boost::bind ( &Router_Node::parametersCallback, this, _1, _2 );
@@ -440,10 +442,13 @@ void Router_Node::publish() {
     finished_robots_.clear();
     nav_msgs::Path msg_path;
     tuw_multi_robot_msgs::Route msg_route;
+    tuw_multi_robot_msgs::RouteTable route_table;
     msg_path.header.seq = 0;
     msg_path.header.stamp = time_first_robot_started_;
     msg_path.header.frame_id = "map";
     msg_route.header = msg_path.header;
+    route_table.header = msg_path.header;
+
 
     for ( int i = 0; i < active_robots_.size(); i++ ) {
         RobotInfoPtr robot = active_robots_[i];
@@ -526,7 +531,8 @@ void Router_Node::publish() {
 
             msg_route.segments.push_back ( seg );
         }
-
+        
+        route_table.routes.push_back(msg_route);
         robot->pubRoute_.publish ( msg_route );
     }
 
@@ -540,6 +546,7 @@ void Router_Node::publish() {
     ps.duration = ( int32_t ) getDuration_ms();
 
     pubPlannerStatus_.publish ( ps );
+    pubRoutingTable_.publish (route_table);
 }
 
 size_t Router_Node::getHash ( const std::vector<signed char> &_map, const Eigen::Vector2d &_origin, const float &_resolution ) {

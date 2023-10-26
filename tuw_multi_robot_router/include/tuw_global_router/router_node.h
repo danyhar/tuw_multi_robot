@@ -93,6 +93,7 @@ private:
     dynamic_reconfigure::Server<tuw_multi_robot_router::routerConfig> param_server;
     dynamic_reconfigure::Server<tuw_multi_robot_router::routerConfig>::CallbackType call_type;
     ros::Publisher pubPlannerStatus_;
+    ros::Publisher pubRoutingTable_;
 
     std::vector<ros::Subscriber> subOdom_;
     ros::Subscriber subGoalSet_;
