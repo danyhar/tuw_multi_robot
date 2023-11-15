@@ -3,7 +3,7 @@ all: help
 help:
 	@echo "make create 			- creates both container of the images"
 	@echo "make start  			- starts tuw-bridge and rosmaster container"
-	@echo "make attach-master	- attaches a consol session to rosmaster container"
+	@echo "make attach-master		- attaches a consol session to rosmaster container"
 	@echo "make stop   			- stops tuw-bridge and rosmaster container"
 	@echo "make remove 			- removes tuw-bridge and rosmaster container"
 

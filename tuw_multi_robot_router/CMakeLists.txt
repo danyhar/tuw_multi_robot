@@ -13,6 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   roscpp
   tf
+  std_msgs
+  std_srvs
   tuw_multi_robot_msgs
   tuw_voronoi_graph
 )
@@ -150,7 +152,7 @@ endif()
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES tuw_multi_robot_router
-  CATKIN_DEPENDS dynamic_reconfigure geometry_msgs nav_msgs roscpp tf tuw_multi_robot_msgs tuw_voronoi_graph
+  CATKIN_DEPENDS dynamic_reconfigure geometry_msgs nav_msgs roscpp tf std_srvs tuw_multi_robot_msgs tuw_voronoi_graph
 #  DEPENDS system_lib
 )
 

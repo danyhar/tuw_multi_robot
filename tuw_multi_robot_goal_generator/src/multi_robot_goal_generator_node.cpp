@@ -64,6 +64,7 @@ void RadomGoalGeneratorNode::updateNrOfRobots ( size_t nr_of_robots ) {
 
 void RadomGoalGeneratorNode::callback ( const nav_msgs::OccupancyGrid::ConstPtr& msg ) {
     msg_map_ = msg;
+    ROS_INFO("Received map");
     publish () ;
     ros::shutdown();
 }

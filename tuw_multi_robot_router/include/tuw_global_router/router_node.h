@@ -40,11 +40,14 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <tuw_multi_robot_msgs/RouterStatus.h>
 #include <dynamic_reconfigure/server.h>
+
 #include <tuw_multi_robot_router/routerConfig.h>
 
 #include <tuw_global_router/router.h>
 #include <tuw_global_router/mrr_utils.h>
 #include <opencv2/core/core.hpp>
+#include <std_srvs/Trigger.h>
+#include <std_msgs/String.h>
 
 //TODO disable got_map if not used
 
@@ -94,13 +97,15 @@ private:
     dynamic_reconfigure::Server<tuw_multi_robot_router::routerConfig>::CallbackType call_type;
     ros::Publisher pubPlannerStatus_;
     ros::Publisher pubRoutingTable_;
-
+    ros::Publisher pubSuccess_;
+    
     std::vector<ros::Subscriber> subOdom_;
     ros::Subscriber subGoalSet_;
     ros::Subscriber subMap_;
     ros::Subscriber subSingleRobotGoal_;
     ros::Subscriber subVoronoiGraph_;
     ros::Subscriber subRobotInfo_;
+    ros::ServiceServer resetService;
 
     std::vector<RobotInfoPtr> subscribed_robots_;       /// robots avaliable
     std::vector<RobotInfoPtr> active_robots_;           /// robots currently used by the planner
@@ -122,6 +127,7 @@ private:
     bool freshPlan_ = false;
     bool monitor_enabled_;
     
+    bool resetRobots(std_srvs::Trigger::Request  &req, std_srvs::Trigger::Response &res);
     void parametersCallback ( tuw_multi_robot_router::routerConfig &config, uint32_t level );
     void odomCallback ( const ros::MessageEvent<nav_msgs::Odometry const> &_event, int _topic );
     void graphCallback ( const tuw_multi_robot_msgs::Graph &msg );

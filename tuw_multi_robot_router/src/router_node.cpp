@@ -37,6 +37,10 @@
 #include <tf/tf.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <fstream>
+#include <string>
+#include <sstream>
+
 
 //TODO add Weights from robots...
 
@@ -57,6 +61,22 @@ int main ( int argc, char **argv ) {
     }
 
     return 0;
+}
+
+void append_line_to_file(const std::string& filename, const std::string& format, ...) {
+    FILE* file = fopen(filename.c_str(), "a");
+    if (file == nullptr) {
+        // Handle error: file could not be opened
+        ROS_INFO("File error");
+        return;
+    }
+
+    va_list args;
+    va_start(args, format);
+    vfprintf(file, format.c_str(), args);
+    va_end(args);
+
+    fclose(file);
 }
 
 
@@ -84,7 +104,7 @@ Router_Node::Router_Node ( ros::NodeHandle &_n ) : Router(),
     if ( single_robot_mode_) {
         /// Sinble Robot Mode
         ROS_INFO("Single Robot Mode");
-        subSingleRobotGoal_ = n_.subscribe ( "goal", 1, &Router_Node::goalCallback, this );
+        subSingleRobotGoal_ = n_.subscribe ( "goal", 10, &Router_Node::goalCallback, this );
     } else {
         /// Multi Robot Mode
         ROS_INFO("Multi Robot Mode");
@@ -94,10 +114,20 @@ Router_Node::Router_Node ( ros::NodeHandle &_n ) : Router(),
     //static publishers
     pubPlannerStatus_ = n_.advertise<tuw_multi_robot_msgs::RouterStatus> ( "planner_status", 1 );
     pubRoutingTable_ = n_.advertise<tuw_multi_robot_msgs::RouteTable> ("/robot_route_table", 1);
+    pubSuccess_ = n_.advertise<std_msgs::String> ( "planner_success", 1 );
+
+    // Services
+    resetService = n_.advertiseService("/reset_robots", &Router_Node::resetRobots, this);
 
     //dynamic reconfigure
     call_type = boost::bind ( &Router_Node::parametersCallback, this, _1, _2 );
     param_server.setCallback ( call_type );
+}
+
+bool Router_Node::resetRobots(std_srvs::Trigger::Request  &req, std_srvs::Trigger::Response &res)
+{
+  publishEmpty();
+  return true;
 }
 
 void Router_Node::monitorExecution() {
@@ -394,6 +424,17 @@ void Router_Node::goalsCallback ( const tuw_multi_robot_msgs::RobotGoalsArray &_
               (priorityRescheduling_?"PR= on":"PR= off"), (speedRescheduling_?"SR= on":"SR= off"), (collisionResolver_?"CR= on":"CR= off"),
               rate_success, avr_duration_total, avr_duration_successful);
 
+
+        std_msgs::String msg;
+        std::stringstream ss;
+        ss << "Success " << attempts_successful_ << ", " << attempts_total_ << " = " << rate_success
+        << ", avr " << avr_duration_total << " ms, success: " << avr_duration_successful << " ms, "
+        << (priorityRescheduling_?"PR= on":"PR= off") << ", " << (speedRescheduling_?"SR= on":"SR= off") << ", "
+        << (collisionResolver_?"CR= on":"CR= off") << " [";
+        ss << rate_success << ", " << avr_duration_total << ", " << avr_duration_successful << "]";
+
+        msg.data = ss.str();
+        pubSuccess_.publish ( msg );
 
         id_++;
     } else if ( !got_map_ || !got_graph_ ) {
