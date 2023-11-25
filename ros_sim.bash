@@ -15,12 +15,12 @@ SLEEP_TIME=60
 ROBOTS=8
 WORLD="warehouse008"
 
-# # Start Framework
-# roslaunch tuw_multi_robot_demo demo.launch room:=$WORLD  nr_of_robots:=$ROBOTS &
-# PID_FRAMEWORK=$!
+# Start Framework
+roslaunch tuw_multi_robot_demo demo.launch room:=$WORLD  nr_of_robots:=$ROBOTS &
+PID_FRAMEWORK=$!
 
-# # Sleep for some time to start framework properly
-# sleep 5
+# Sleep for some time to start framework properly
+sleep 5
 
 # for i in $(seq 0 $ROBOTS);
 # do
@@ -33,12 +33,12 @@ for i in $(seq 1 $MAX_RUNS);
 do
     echo -e $PINK Run $i of $MAX_RUNS $NORMAL
 
-    # Start Framework
-    roslaunch tuw_multi_robot_demo demo.launch room:=$WORLD  nr_of_robots:=$ROBOTS &
-    PID_FRAMEWORK=$!
+    # # Start Framework
+    # roslaunch tuw_multi_robot_demo demo.launch room:=$WORLD  nr_of_robots:=$ROBOTS &
+    # PID_FRAMEWORK=$!
 
-    # Sleep for some time to start framework properly
-    sleep 5
+    # # Sleep for some time to start framework properly
+    # sleep 5
 
     # for j in $(seq 0 $ROBOTS);
     # do
@@ -64,8 +64,9 @@ do
     wait $!
 
     sleep $SLEEP_TIME
-    #wait $PID_ROSTOPIC
-    kill $PID_FRAMEWORK $PID_ROSTOPIC $PID_GOAL_SAVER
+    wait $PID_ROSTOPIC $PID_GOAL_SAVER
+    #kill $PID_FRAMEWORK $PID_ROSTOPIC $PID_GOAL_SAVER
+    rosservice call /reset_positions
     sleep 15
     # wait $PID_GOAL_SAVER $PID_GOAL_GENERATOR $PID_ROSTOPIC
     # wait $PID_GOAL_SAVER
