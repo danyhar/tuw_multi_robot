@@ -63,23 +63,6 @@ int main ( int argc, char **argv ) {
     return 0;
 }
 
-void append_line_to_file(const std::string& filename, const std::string& format, ...) {
-    FILE* file = fopen(filename.c_str(), "a");
-    if (file == nullptr) {
-        // Handle error: file could not be opened
-        ROS_INFO("File error");
-        return;
-    }
-
-    va_list args;
-    va_start(args, format);
-    vfprintf(file, format.c_str(), args);
-    va_end(args);
-
-    fclose(file);
-}
-
-
 namespace multi_robot_router {
 
 Router_Node::Router_Node ( ros::NodeHandle &_n ) : Router(),
@@ -126,7 +109,7 @@ Router_Node::Router_Node ( ros::NodeHandle &_n ) : Router(),
 
 bool Router_Node::resetRobots(std_srvs::Trigger::Request  &req, std_srvs::Trigger::Response &res)
 {
-  publishEmpty();
+  publishReset();
   return true;
 }
 
@@ -471,6 +454,28 @@ void Router_Node::publishEmpty() {
     }
 
     mrrp_status_.id = id_;
+    mrrp_status_.success = 0;
+    mrrp_status_.duration = getDuration_ms();
+    pubPlannerStatus_.publish ( mrrp_status_ );
+}
+
+void Router_Node::publishReset() {
+    if(publish_routing_table_ == false) return;
+    time_first_robot_started_ = ros::Time::now();
+    finished_robots_.clear();
+    nav_msgs::Path msg_path;
+    tuw_multi_robot_msgs::Route msg_route;
+    msg_path.header.seq = 0;
+    msg_path.header.stamp = time_first_robot_started_;
+    msg_path.header.frame_id = "map";
+    msg_route.header = msg_path.header;
+
+    for ( RobotInfoPtr &robot: subscribed_robots_ ) {
+        robot->pubPaths_.publish ( msg_path );
+        robot->pubRoute_.publish ( msg_route );
+    }
+
+    mrrp_status_.id = 200;
     mrrp_status_.success = 0;
     mrrp_status_.duration = getDuration_ms();
     pubPlannerStatus_.publish ( mrrp_status_ );

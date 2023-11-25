@@ -65,6 +65,7 @@ public:
      * @brief publishes an empty RoutingTable
      */
     void publishEmpty();
+    void publishReset();
     /**
      * @brief publishes a RoutingTable
      */
