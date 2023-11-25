@@ -11,41 +11,67 @@ WHITE="\033[37m"
 NORMAL="\033[0;39m"
 
 MAX_RUNS=3
-
-ROBOTS=4
+SLEEP_TIME=60
+ROBOTS=8
 WORLD="warehouse008"
 
-# Start Framework
-roslaunch tuw_multi_robot_demo demo.launch room:=$WORLD  nr_of_robots:=$ROBOTS &
-PID_FRAMEWORK=$!
+# # Start Framework
+# roslaunch tuw_multi_robot_demo demo.launch room:=$WORLD  nr_of_robots:=$ROBOTS &
+# PID_FRAMEWORK=$!
 
-# Sleep for some time to start framework properly
-sleep 25
+# # Sleep for some time to start framework properly
+# sleep 5
+
+# for i in $(seq 0 $ROBOTS);
+# do
+#     rostopic pub -1  /robot_$i/ctrl std_msgs/String "stop"
+# done 
+
+source ../../devel/setup.bash
 
 for i in $(seq 1 $MAX_RUNS);
 do
-    echo -e $PINK Run $i of $MAX_RUNS
-    
+    echo -e $PINK Run $i of $MAX_RUNS $NORMAL
+
+    # Start Framework
+    roslaunch tuw_multi_robot_demo demo.launch room:=$WORLD  nr_of_robots:=$ROBOTS &
+    PID_FRAMEWORK=$!
+
+    # Sleep for some time to start framework properly
+    sleep 5
+
+    # for j in $(seq 0 $ROBOTS);
+    # do
+    #     rostopic pub -1  /robot_$j/ctrl std_msgs/String "stop"
+    # done 
+
+    echo -e $BLUE
     # Start rostopic to ensure planner has finished
-    rostopic echo -n 1 /planner_status &
+    rostopic echo -n 1 -p /planner_status | tee -a ~/customlaunch/result/r8/PR_SR_CRout$i.txt &
     PID_ROSTOPIC=$!
     sleep 5
-    # Start a goal saver
-    echo -e $NORMAL "Starting goal saver"
-    rosrun tuw_multi_robot_goal_generator goals_saver _file_name:=/home/robot/goals$i.txt &
-    PID_GOAL_SAVER=$!
 
-    sleep 15
+    # Start a goal saver
+    echo -e $CYAN "Starting goal saver"
+    rosrun tuw_multi_robot_goal_generator goals_saver _file_name:=/home/robot/customlaunch/result/r8/PR_SR_CRgoals$i.txt &
+    PID_GOAL_SAVER=$!
+    sleep 5
+    
+    echo -e $NORMAL
 
     # Start a goal generator
     rosrun tuw_multi_robot_goal_generator goals_random _nr_of_robots:=$ROBOTS _distance_boundary:=0.6 _distance_to_map_border:=0.2 _nr_of_avaliable_robots:=$ROBOTS &
-    PID_GOAL_GENERATOR=$!
+    wait $!
 
+    sleep $SLEEP_TIME
+    #wait $PID_ROSTOPIC
+    kill $PID_FRAMEWORK $PID_ROSTOPIC $PID_GOAL_SAVER
     sleep 15
-
-    wait $PID_GOAL_SAVER $PID_GOAL_GENERATOR $PID_ROSTOPIC
+    # wait $PID_GOAL_SAVER $PID_GOAL_GENERATOR $PID_ROSTOPIC
     # wait $PID_GOAL_SAVER
-done
+    
+done;
 
-sleep 25
+# sleep 25
 kill $PID_FRAMEWORK
+echo -e $GREEN Everything finished $NORMAL

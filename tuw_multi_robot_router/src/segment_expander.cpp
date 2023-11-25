@@ -110,6 +110,7 @@ void SegmentExpander::addExpansoionCandidate(Vertex &_current, Vertex &_next, Ve
 
             for (Vertex &res : resolutions)
             {
+                ROS_INFO("Added node: %d", res.getSegment().getSegmentId());
                 float h = hx_.calcHeuristic(res, _end);
                 res.weight = res.potential + h;
 
