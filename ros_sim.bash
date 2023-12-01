@@ -10,24 +10,25 @@ CYAN="\033[36m"
 WHITE="\033[37m"
 NORMAL="\033[0;39m"
 
-MAX_RUNS=3
+MAX_RUNS=50
 SLEEP_TIME=60
 ROBOTS=8
 WORLD="warehouse008"
+
+source /home/robot/projects/mrrp/ws02/devel/setup.bash
 
 # Start Framework
 roslaunch tuw_multi_robot_demo demo.launch room:=$WORLD  nr_of_robots:=$ROBOTS &
 PID_FRAMEWORK=$!
 
 # Sleep for some time to start framework properly
-sleep 5
+sleep 30
 
 # for i in $(seq 0 $ROBOTS);
 # do
 #     rostopic pub -1  /robot_$i/ctrl std_msgs/String "stop"
 # done 
 
-source ../../devel/setup.bash
 
 for i in $(seq 1 $MAX_RUNS);
 do
@@ -61,13 +62,16 @@ do
 
     # Start a goal generator
     rosrun tuw_multi_robot_goal_generator goals_random _nr_of_robots:=$ROBOTS _distance_boundary:=0.6 _distance_to_map_border:=0.2 _nr_of_avaliable_robots:=$ROBOTS &
-    wait $!
+    #wait $!
+    PID_GOAL_GENERATOR=$!
 
     sleep $SLEEP_TIME
-    wait $PID_ROSTOPIC $PID_GOAL_SAVER
+    kill $PID_ROSTOPIC $PID_GOAL_SAVER $PID_GOAL_GENERATOR
     #kill $PID_FRAMEWORK $PID_ROSTOPIC $PID_GOAL_SAVER
-    rosservice call /reset_positions
-    sleep 15
+    # rosservice call /reset_routes
+    # sleep 5
+    # rosservice call /reset_positions
+    sleep 10
     # wait $PID_GOAL_SAVER $PID_GOAL_GENERATOR $PID_ROSTOPIC
     # wait $PID_GOAL_SAVER
     

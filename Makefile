@@ -11,7 +11,7 @@ create-bridge:
 	@docker run -it -d --name tuw-bridge --net=host registry.auto.tuwien.ac.at/roblab/docker/focal/galactic-tuw-bridge /bin/bash -c "ros2 run ros1_bridge dynamic_bridge --bridge-all-topics"
 
 create-eval-bridge:
-	@docker run -it -d --name tuw-eval-bridge --net=host registry.auto.tuwien.ac.at/roblab/docker/focal/eval-tuw-bridge /bin/bash -c "ros2 run ros1_bridge dynamic_bridge --bridge-all-topics"
+	@docker run -it -d --restart unless-stopped --name tuw-eval-bridge --net=host registry.auto.tuwien.ac.at/roblab/docker/focal/eval-tuw-bridge /bin/bash -c "ros2 run ros1_bridge dynamic_bridge --bridge-all-topics"
 
 create-rosmaster:
 	@docker run --privileged -ti --network="host" --name rosmaster --env="DISPLAY" -v /home/daniel/rosprojects/customlaunch:/home/robot/customlaunch -v /home/daniel/rosprojects/ws02:/home/robot/projects/mrrp/ws02  registry.auto.tuwien.ac.at/roblab/docker/focal/noetic-mrrp-desktop

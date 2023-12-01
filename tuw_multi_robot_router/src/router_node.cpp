@@ -75,8 +75,6 @@ Router_Node::Router_Node ( ros::NodeHandle &_n ) : Router(),
     sum_processing_time_successful_(.0){
     id_ = 0;
 
-
-
     n_param_.param<bool> ( "single_robot_mode", single_robot_mode_, false );
 
     // static subscriptions
@@ -100,7 +98,7 @@ Router_Node::Router_Node ( ros::NodeHandle &_n ) : Router(),
     pubSuccess_ = n_.advertise<std_msgs::String> ( "planner_success", 1 );
 
     // Services
-    resetService = n_.advertiseService("/reset_robots", &Router_Node::resetRobots, this);
+    resetService = n_.advertiseService("/reset_routes", &Router_Node::resetRobots, this);
 
     //dynamic reconfigure
     call_type = boost::bind ( &Router_Node::parametersCallback, this, _1, _2 );
@@ -407,18 +405,6 @@ void Router_Node::goalsCallback ( const tuw_multi_robot_msgs::RobotGoalsArray &_
               (priorityRescheduling_?"PR= on":"PR= off"), (speedRescheduling_?"SR= on":"SR= off"), (collisionResolver_?"CR= on":"CR= off"),
               rate_success, avr_duration_total, avr_duration_successful);
 
-
-        std_msgs::String msg;
-        std::stringstream ss;
-        ss << "Success " << attempts_successful_ << ", " << attempts_total_ << " = " << rate_success
-        << ", avr " << avr_duration_total << " ms, success: " << avr_duration_successful << " ms, "
-        << (priorityRescheduling_?"PR= on":"PR= off") << ", " << (speedRescheduling_?"SR= on":"SR= off") << ", "
-        << (collisionResolver_?"CR= on":"CR= off") << " [";
-        ss << rate_success << ", " << avr_duration_total << ", " << avr_duration_successful << "]";
-
-        msg.data = ss.str();
-        pubSuccess_.publish ( msg );
-
         id_++;
     } else if ( !got_map_ || !got_graph_ ) {
         publishEmpty();
@@ -443,42 +429,53 @@ void Router_Node::publishEmpty() {
     finished_robots_.clear();
     nav_msgs::Path msg_path;
     tuw_multi_robot_msgs::Route msg_route;
+    tuw_multi_robot_msgs::RouteTable route_table;
+    
     msg_path.header.seq = 0;
     msg_path.header.stamp = time_first_robot_started_;
     msg_path.header.frame_id = "map";
     msg_route.header = msg_path.header;
+    route_table.header = msg_path.header;
 
     for ( RobotInfoPtr &robot: subscribed_robots_ ) {
         robot->pubPaths_.publish ( msg_path );
         robot->pubRoute_.publish ( msg_route );
+        route_table.routes.push_back(msg_route);
     }
 
     mrrp_status_.id = id_;
     mrrp_status_.success = 0;
     mrrp_status_.duration = getDuration_ms();
     pubPlannerStatus_.publish ( mrrp_status_ );
+    pubRoutingTable_.publish (route_table);
 }
 
 void Router_Node::publishReset() {
     if(publish_routing_table_ == false) return;
+    ROS_INFO ( "Reset route table");
     time_first_robot_started_ = ros::Time::now();
     finished_robots_.clear();
     nav_msgs::Path msg_path;
     tuw_multi_robot_msgs::Route msg_route;
+    tuw_multi_robot_msgs::RouteTable route_table;
+    
     msg_path.header.seq = 0;
     msg_path.header.stamp = time_first_robot_started_;
     msg_path.header.frame_id = "map";
     msg_route.header = msg_path.header;
+    route_table.header = msg_path.header;
 
     for ( RobotInfoPtr &robot: subscribed_robots_ ) {
         robot->pubPaths_.publish ( msg_path );
         robot->pubRoute_.publish ( msg_route );
+        route_table.routes.push_back(msg_route);
     }
 
     mrrp_status_.id = 200;
     mrrp_status_.success = 0;
     mrrp_status_.duration = getDuration_ms();
     pubPlannerStatus_.publish ( mrrp_status_ );
+    pubRoutingTable_.publish (route_table);
 }
 
 void Router_Node::publish() {
@@ -579,7 +576,7 @@ void Router_Node::publish() {
         }
         
         route_table.routes.push_back(msg_route);
-        robot->pubRoute_.publish ( msg_route );
+        //robot->pubRoute_.publish ( msg_route );
     }
 
     tuw_multi_robot_msgs::RouterStatus ps;
@@ -590,6 +587,7 @@ void Router_Node::publish() {
     ps.priority_scheduling_attemps = ( int32_t ) getPriorityScheduleAttemps();
     ps.speed_scheduling_attemps = ( int32_t ) getSpeedScheduleAttemps();
     ps.duration = ( int32_t ) getDuration_ms();
+    ps.added_nodes = 20;
 
     pubPlannerStatus_.publish ( ps );
     pubRoutingTable_.publish (route_table);

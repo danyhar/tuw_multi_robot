@@ -407,7 +407,7 @@ bool Router::makePlan(const std::vector<Eigen::Vector3d> &_starts, const std::ve
     auto t2 = std::chrono::high_resolution_clock::now();
     duration_ = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
     //DEBUG STATS
-
+    ROS_INFO("Nodes. %d", multiRobotRouter_->getAddedNodes());
     return true;
 }
 

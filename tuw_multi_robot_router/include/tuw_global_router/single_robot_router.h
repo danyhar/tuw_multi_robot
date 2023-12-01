@@ -94,6 +94,8 @@ class SingleRobotRouter
              */
     SegmentExpander::CollisionResolverType getCollisionResolverType() const;
 
+  const uint32_t &getAddedNodes() const;
+
   private:
     void resetAttempt();
     SegmentExpander segment_expander_;

@@ -101,7 +101,7 @@ class MultiRobotRouter : protected RouteGenerator
              * @brief enables or disables speed rescheduling 
              */
     virtual void setSpeedRescheduling(const bool _status);
-
+    const uint32_t &getAddedNodes() const;
   private:
     void resetAttempt(const std::vector<Segment> &_graph);
     // attemps to find a routing table according to a given priority and speed schedule

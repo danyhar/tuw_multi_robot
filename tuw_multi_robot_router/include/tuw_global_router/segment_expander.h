@@ -86,6 +86,7 @@ class SegmentExpander
              * @brief gets the currently used collision resolver 
              */
     CollisionResolverType getCollisionResolver() const;
+    const uint32_t &getAddedNodes() const;
 
   private:
     template <class T, class S, class C>
@@ -116,6 +117,7 @@ class SegmentExpander
     std::priority_queue<Vertex *, std::vector<Vertex *>, greaterSegmentWrapper> seg_queue_;
     uint32_t neutral_cost_ = 1;
     uint32_t diameter_;
+    uint32_t addedNodes_ = 0;
 
     Heuristic hx_;
     PotentialCalculator pCalc_;

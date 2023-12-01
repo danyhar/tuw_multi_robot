@@ -62,6 +62,7 @@ SegmentExpander::CollisionResolverType SegmentExpander::getCollisionResolver() c
 
 void SegmentExpander::reset()
 {
+    addedNodes_ = 0;
     collisions_robots_.clear();
     startSegments_.clear();
 }
@@ -108,9 +109,10 @@ void SegmentExpander::addExpansoionCandidate(Vertex &_current, Vertex &_next, Ve
         {
             std::vector<std::reference_wrapper<Vertex>> resolutions = collision_resolution_->resolve(_current, _next, collision);
 
+            //ROS_INFO("Lenght before: %ld", seg_queue_.size());
+
             for (Vertex &res : resolutions)
             {
-                ROS_INFO("Added node: %d", res.getSegment().getSegmentId());
                 float h = hx_.calcHeuristic(res, _end);
                 res.weight = res.potential + h;
 
@@ -119,8 +121,11 @@ void SegmentExpander::addExpansoionCandidate(Vertex &_current, Vertex &_next, Ve
                     res.weight = 0;
                 }
 
+                addedNodes_++;
                 seg_queue_.push(&res);
             }
+
+            //ROS_INFO("Lenght after: %ld", seg_queue_.size());
         }
 
         return;
@@ -300,5 +305,10 @@ const std::vector<uint32_t> &SegmentExpander::getRobotCollisions() const
 {
     return collision_resolution_->getRobotCollisions();
 }
+
+const uint32_t &SegmentExpander::getAddedNodes() const
+{
+    return addedNodes_;
+} 
 
 } // namespace multi_robot_router

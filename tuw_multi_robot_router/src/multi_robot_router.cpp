@@ -148,7 +148,7 @@ namespace multi_robot_router
         while(usePriorityRescheduler_ && duration < _timeLimit && !found && priority_scheduler_.reschedulePriorities(lastPlannedRobot, srr.getRobotCollisions(), priorityList, firstSchedule));
         routingTable = generatePath(routeCandidates, *route_coordinator_);
 
-        ROS_INFO ("Resolved %d collisions for robot 0", robotCollisions_[0]);
+        //ROS_INFO ("Resolved %d collisions for robot 0", robotCollisions_[0]);
         return found;
     }
 
@@ -206,6 +206,10 @@ namespace multi_robot_router
         useSpeedRescheduler_ = _status;
     }
 
+    const uint32_t &MultiRobotRouter::getAddedNodes() const
+    {
+        return srr.getAddedNodes();
+    }
     
 }
 

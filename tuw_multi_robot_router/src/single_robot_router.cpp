@@ -119,4 +119,9 @@ const std::vector<uint32_t> &SingleRobotRouter::getRobotCollisions() const
 {
     return segment_expander_.getRobotCollisions();
 }
+
+const uint32_t &SingleRobotRouter::getAddedNodes() const
+{
+    return segment_expander_.getAddedNodes();
+}
 } // namespace multi_robot_router

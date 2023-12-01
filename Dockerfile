@@ -13,6 +13,7 @@ WORKDIR ${ROS1_WS}/src
 
 ##### Add more custom messages here (ROS 1) #####
 COPY ./docker/ros1/RouteTable.msg ./tuw_msgs/tuw_multi_robot_msgs/msg
+COPY ./docker/ros1/RouterStatus.msg ./tuw_msgs/tuw_multi_robot_msgs/msg
 COPY ./docker/ros1/CMakeLists.txt ./tuw_msgs/tuw_multi_robot_msgs/
 
 # Build the ROS1 WS
@@ -27,6 +28,7 @@ WORKDIR  ${ROS2_WS}/src
 
 ##### Add more custom messages here (ROS 2) #####
 COPY ./docker/ros2/RouteTable.msg ./tuw_msgs/tuw_multi_robot_msgs/msg
+COPY ./docker/ros2/RouterStatus.msg ./tuw_msgs/tuw_multi_robot_msgs/msg
 COPY ./docker/ros2/CMakeLists.txt ./tuw_msgs/tuw_multi_robot_msgs/
 
 
