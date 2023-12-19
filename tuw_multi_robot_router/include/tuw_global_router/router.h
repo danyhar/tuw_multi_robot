@@ -92,6 +92,7 @@ class Router
              * @returns the speed reschedule attempts
              */
     uint32_t getSpeedScheduleAttemps() const;
+    uint32_t getAddedNodes() const;
 
     std::shared_ptr<float> potential_;
 

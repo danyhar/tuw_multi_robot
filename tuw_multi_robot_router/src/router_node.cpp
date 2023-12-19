@@ -587,7 +587,7 @@ void Router_Node::publish() {
     ps.priority_scheduling_attemps = ( int32_t ) getPriorityScheduleAttemps();
     ps.speed_scheduling_attemps = ( int32_t ) getSpeedScheduleAttemps();
     ps.duration = ( int32_t ) getDuration_ms();
-    ps.added_nodes = 20;
+    ps.added_nodes = ( int32_t ) getAddedNodes();
 
     pubPlannerStatus_.publish ( ps );
     pubRoutingTable_.publish (route_table);

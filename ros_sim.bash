@@ -11,11 +11,10 @@ WHITE="\033[37m"
 NORMAL="\033[0;39m"
 
 MAX_RUNS=50
-SLEEP_TIME=60
-ROBOTS=8
-WORLD="warehouse008"
-
-source /home/robot/projects/mrrp/ws02/devel/setup.bash
+SLEEP_TIME=120
+ROBOTS=64
+WORLD="warehouse200"
+BASE_PATH="/home/mr/mstar-results/mrrp/r64"
 
 # Start Framework
 roslaunch tuw_multi_robot_demo demo.launch room:=$WORLD  nr_of_robots:=$ROBOTS &
@@ -48,14 +47,19 @@ do
 
     echo -e $BLUE
     # Start rostopic to ensure planner has finished
-    rostopic echo -n 1 -p /planner_status | tee -a ~/customlaunch/result/r8/PR_SR_CRout$i.txt &
+    rostopic echo -n 1 -p /planner_status | tee -a $BASE_PATH/status/PR_SR_CRout$i.txt &
     PID_ROSTOPIC=$!
     sleep 5
 
     # Start a goal saver
     echo -e $CYAN "Starting goal saver"
-    rosrun tuw_multi_robot_goal_generator goals_saver _file_name:=/home/robot/customlaunch/result/r8/PR_SR_CRgoals$i.txt &
+    rosrun tuw_multi_robot_goal_generator goals_saver _file_name:=$BASE_PATH/goals/PR_SR_CRgoals$i.txt &
     PID_GOAL_SAVER=$!
+    sleep 5
+
+    # Start rostopic to store route table
+    rostopic echo -n 1 /robot_route_table | tee -a $BASE_PATH/table/PR_SR_CRout$i.txt &
+    PID_TABLE=$!
     sleep 5
     
     echo -e $NORMAL
@@ -66,7 +70,7 @@ do
     PID_GOAL_GENERATOR=$!
 
     sleep $SLEEP_TIME
-    kill $PID_ROSTOPIC $PID_GOAL_SAVER $PID_GOAL_GENERATOR
+    kill $PID_ROSTOPIC $PID_GOAL_SAVER $PID_GOAL_GENERATOR $PID_TABLE
     #kill $PID_FRAMEWORK $PID_ROSTOPIC $PID_GOAL_SAVER
     # rosservice call /reset_routes
     # sleep 5

@@ -485,4 +485,8 @@ uint32_t Router::getSpeedScheduleAttemps() const
 {
     return multiRobotRouter_->getSpeedScheduleAttempts();
 }
+uint32_t Router::getAddedNodes() const 
+{
+    return multiRobotRouter_->getAddedNodes();
+}
 } // namespace multi_robot_router
